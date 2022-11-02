@@ -1,10 +1,9 @@
-
 import streamlit as st
 import random
 import altair as alt
 import numpy as np
 import pandas as pd
-
+import altair as alt
 
 st.header('Homework 1')
 
@@ -15,18 +14,36 @@ st.markdown(
 )
 
 st.code(
-''' 
-x_limit = 
+'''
+x_limit = 100
 
 # List of values from 0 to 100 each value being 1 greater than the last
-x_axis = np.arange()
+
+x_axis = np.arange(0,x_limit,1)
 
 # Create a random array of data that we will use for our y values
-y_data = []
+
+y_data = np.random.rand(100)
+
 
 df = pd.DataFrame({'x': x_axis,
                      'y': y_data})
-st.write(df)''',language='python')
+
+st.write(df)
+
+''',language='python')
+
+x_limit = 100
+
+x_axis = np.arange(0,x_limit,1)
+
+y_data = np.random.rand(100)
+
+
+df = pd.DataFrame({'x': x_axis,
+                     'y': y_data})
+
+st.write(df)
 
 
 st.markdown(
@@ -36,9 +53,18 @@ st.markdown(
 
 st.code(
 ''' 
-scatter = alt.Chart().mark_point().encode()
+scatter = alt.Chart(df).mark_point().encode(
+    x='x', y='y'
+)
 
-st.altair_chart(scatter, use_container_width=True)''',language='python')
+st.altair_chart(scatter, use_container_width=True)
+''',language='python')
+
+scatter = alt.Chart(df).mark_point().encode(
+    x='x', y='y'
+)
+
+st.altair_chart(scatter, use_container_width=True)
 
 
 st.markdown(
@@ -49,17 +75,31 @@ st.markdown(
 "https://discuss.streamlit.io/t/how-to-indent-bullet-point-list-items/28594/3"
 )
 
-st.markdown("The five changes I made were.....")
+
 st.markdown("""
 The 5 changes I made were:
-- Change 1
-- Change 2
-- Change 3
-- Change 4
-- Change 5
+- Data points are orange in color
+- Selector changes point color to red when clicked
+- Interactive so you can zoom in and out
+- Tooltip that shows x and y values upon hover
+- Added title 
 """)
 
 
+selector = alt.selection(type="single", empty='none')
+
+scatter = alt.Chart(df, title = "First streamlit scatter plot").mark_point().encode(
+    x='x', y='y', 
+    color= alt.condition(
+        selector, # replace the previous condition with the selector
+        alt.value("darkred"),
+        alt.value("orange")),
+    tooltip = ['x','y']
+).add_selection(
+    selector
+    ).interactive()
+
+st.altair_chart(scatter, use_container_width=True)
 
 st.markdown(
 "**QUESTION 4**: Explore on your own!  Go visit https://altair-viz.github.io/gallery/index.html.\n "
@@ -69,18 +109,39 @@ st.markdown(
 
 st.markdown("""
 The 2 changes I made were:
-- Change 1
-- Change 2
+- Added title
+- Added tooltip showing data for each bar upon hover
 """
 )
 
-source = pd.read_json('imdb.json')
+source = pd.read_json("wheat.json")
 
-bar = alt.Chart(source).mark_bar(color='#03cffc').encode(
+chart1 = alt.Chart(source).mark_bar().encode(
+    x='year:O',
+    y="wheat:Q",
+    # The highlight will be set on the result of a conditional statement
+    color=alt.condition(
+        alt.datum.year == 1810,  # If the year is 1810 this test returns True,
+        alt.value('orange'),     # which sets the bar orange.
+        alt.value('steelblue')   # And if it's not true it sets the bar steelblue.
+    )
+).properties(width=600)
 
-    alt.X("IMDB_Rating:Q", bin = True, title = "IMDB rating"),
-    alt.Y('count()', title="Records")
-)
+st.altair_chart(chart1, use_container_width=True)
 
-st.altair_chart(bar, use_container_width=True)
+
+
+chart2 = alt.Chart(source, title = "Wheat Production from 1565-1820").mark_bar().encode(
+    x='year:O',
+    y="wheat:Q",
+    # The highlight will be set on the result of a conditional statement
+    color=alt.condition(
+        alt.datum.year == 1810,  # If the year is 1810 this test returns True,
+        alt.value('orange'),     # which sets the bar orange.
+        alt.value('steelblue')   # And if it's not true it sets the bar steelblue.
+    ),
+    tooltip = ['year', 'wheat']
+).properties(width=600)
+
+st.altair_chart(chart2, use_container_width=True)
 
